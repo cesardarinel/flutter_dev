@@ -1,7 +1,28 @@
 FROM ubuntu:18.04
+MAINTAINER César Ortiz "https://github.com/cesardarinel"
 
 # Prerequisites
+RUN apt-get update && apt-get -y install sudo
 RUN apt update && apt install -y curl git unzip xz-utils zip libglu1-mesa openjdk-8-jdk wget
+# SSH
+RUN apt-get update
+
+RUN apt-get install -y openssh-server
+RUN mkdir /var/run/sshd
+
+RUN echo 'root:root' |chpasswd
+
+RUN sed -ri 's/^#?PermitRootLogin\s+.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+RUN sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config
+
+RUN mkdir /root/.ssh
+
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+EXPOSE 22
+
+CMD    ["/usr/sbin/sshd", "-D"]
 
 # Setup new user
 RUN useradd -ms /bin/bash developer
